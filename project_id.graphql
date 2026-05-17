@@ -1,0 +1,8 @@
+{
+  user(login: "japostadan") {
+    projectV2(number: 7) {
+      id
+      title
+    }
+  }
+}

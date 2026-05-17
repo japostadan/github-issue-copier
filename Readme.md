@@ -1,6 +1,6 @@
-### **1. Directory structure**
+## Setup
 
-Make sure your folder looks like this:
+### 1. Directory structure
 
 ```
 github_issue_copier/
@@ -9,116 +9,69 @@ github_issue_copier/
 ├─ repo.py
 ├─ project.py
 ├─ utils.py
-└─ main.py
+├─ main.py
+├─ conftest.py
+├─ requirements.txt
+└─ tests/
+   ├─ test_repo.py
+   └─ test_copy_issues.py
 ```
 
-And your `.env` file is in the same directory or project root:
-
-```
-SRC_REPO=yourusername/source-repo
-DEST_REPO=yourusername/destination-repo
-GH_TOKEN=your_github_personal_access_token
-PROJECT_NODE_ID=your_project_node_id
-STATUS_FIELD_ID=your_status_field_id
-TODO_OPTION_ID=your_todo_option_id
-```
-
----
-
-### **2. Create and activate a virtual environment**
-
-**Create the virtual environment**:
+### 2. Create and activate a virtual environment
 
 ```bash
-python -m venv venv
+python -m venv .venv
+source .venv/bin/activate        # macOS/Linux
+.venv\Scripts\activate           # Windows
 ```
 
-**Activate it**:
-
-- **Windows (Command Prompt):**
-
-```bash
-venv\Scripts\activate
-```
-
-- **macOS/Linux:**
-
-```bash
-source venv/bin/activate
-```
-
-> Your terminal prompt should now show `(venv)` indicating the venv is active.
-
----
-
-### **3. Install dependencies**
-
-With the venv activated, install the required Python packages:
-
-```bash
-pip install python-dotenv requests
-```
-
-You can optionally save these to a `requirements.txt` for future use:
-
-```bash
-pip freeze > requirements.txt
-```
-
-Later, you or others can reinstall them with:
+### 3. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
----
+To also run tests, install the test dependencies:
 
-### **4. Run the program**
+```bash
+pip install pytest responses
+```
 
-From the terminal (with the venv activated), navigate to the folder containing `main.py` and run:
+### 4. Configure environment variables
+
+Create a `.env` file in the project root:
+
+```
+SRC_REPO=owner/source-repo
+DEST_REPO=owner/destination-repo
+GH_TOKEN=your_github_personal_access_token
+
+# Optional — only needed if you want issues added to a GitHub Project board
+PROJECT_NODE_ID=your_project_node_id
+STATUS_FIELD_ID=your_status_field_id
+TODO_OPTION_ID=your_todo_option_id
+```
+
+`SRC_REPO`, `DEST_REPO`, and `GH_TOKEN` are required. The script will exit with a clear error if any are missing.
+
+### 5. Run
 
 ```bash
 python main.py
 ```
 
-- It will read your environment variables from `.env`.
-- Copy open issues from `SRC_REPO` to `DEST_REPO`.
-- Optionally add them to your GitHub project if `PROJECT_NODE_ID` etc. are set.
-- Any errors will be logged to `github_issue_copy.log`.
+The script will:
+- Copy all open issues from `SRC_REPO` to `DEST_REPO` (paginating through all pages).
+- Skip any issue whose title already exists in `DEST_REPO` — safe to re-run.
+- Optionally add each new issue to a GitHub Project board if `PROJECT_NODE_ID` is set.
+- Log errors to `github_issue_copy.log`.
 
----
-
-### **5. Optional: Run as a package**
-
-If you prefer, you can run it as a package from **one level above**:
+### 6. Run tests
 
 ```bash
-python -m github_issue_copier.main
+pytest tests/
 ```
 
-- This uses the package structure directly.
-- Ensure your current directory is **outside** the `github_issue_copier` folder.
+### 7. Look up Project board IDs (optional)
 
----
-
-### **6. Deactivate the virtual environment**
-
-When done, exit the virtual environment:
-
-```bash
-deactivate
-```
-
-Your terminal will return to the system Python.
-
----
-
-### **7. Check logs**
-
-If something goes wrong (like API errors), check:
-
-```
-github_issue_copy.log
-```
-
-It will contain detailed error messages and response data for debugging.
+Use the GraphQL queries in `project_id.graphql` and `fields.graphql` as reference to find your `PROJECT_NODE_ID`, `STATUS_FIELD_ID`, and `TODO_OPTION_ID` via the [GitHub GraphQL Explorer](https://docs.github.com/en/graphql/overview/explorer).
